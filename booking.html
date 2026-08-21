@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Visit</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <h1>Book Your Coastal Visit</h1>
+        <p>Plan your visit with our Coastal Tourism Guide.</p>
+    </header>
+
+    <main class="page-content booking-main">
+
+        <form id="booking-form" class="booking-form" action="https://formspree.io/f/xwleyavl" method="POST">
+
+            <input type="hidden" id="destination" name="destination" value="Coastal visit">
+            <input type="hidden" name="_subject" value="New booking request from Coastal Tourism Guide">
+
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+
+            <label for="date">Date of Visit</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="visitors">Number of Visitors</label>
+            <input type="number" id="visitors" name="visitors" min="1" required>
+
+            <label for="activity">Preferred Activity</label>
+            <select id="activity" name="activity" required>
+                <option value="" selected disabled>Choose an activity</option>
+                <option value="beach-walk">Beach Walk</option>
+                <option value="boat-trip">Boat Trip</option>
+                <option value="snorkeling">Snorkeling</option>
+                <option value="family-picnic">Family Picnic</option>
+            </select>
+
+            <button class="button" type="submit" id="booking-button">Submit Booking</button>
+
+            <p id="confirmation-message" class="confirmation-message" role="status"></p>
+
+        </form>
+
+    </main>
+
+    <script>
+        const bookingForm = document.getElementById('booking-form');
+        const confirmationMessage = document.getElementById('confirmation-message');
+
+        const bookingButton = document.getElementById('booking-button');
+        const destinationField = document.getElementById('destination');
+        const destination = new URLSearchParams(window.location.search).get('destination');
+
+        if (destination) {
+            destinationField.value = destination;
+        }
+
+        bookingForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (!bookingForm.checkValidity()) {
+                bookingForm.reportValidity();
+                return;
+            }
+
+            bookingButton.disabled = true;
+            confirmationMessage.textContent = 'Sending your booking request...';
+            confirmationMessage.className = 'confirmation-message';
+
+            try {
+                const response = await fetch(bookingForm.action, {
+                    method: 'POST',
+                    body: new FormData(bookingForm),
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Booking could not be sent.');
+                }
+
+                confirmationMessage.textContent = 'Thank you! Your booking request has been sent successfully.';
+                confirmationMessage.className = 'confirmation-message show-message';
+                bookingForm.reset();
+                destinationField.value = destination || 'Coastal visit';
+            } catch (error) {
+                confirmationMessage.textContent = 'Sorry, your booking could not be sent. Please try again.';
+                confirmationMessage.className = 'confirmation-message error-message';
+            } finally {
+                bookingButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
